@@ -9,30 +9,24 @@ const callAPI = () => {
 
   // Validar que la API key no esté vacía
   if (!apiKey) {
-    output.innerHTML = "Por favor, ingresa tu API key";
+    output.innerHTML = "Por favor, ingresa tu API key de Googl ";
     return;
   }
 
-  const API_URL = "https://router.huggingface.co/fireworks-ai/inference/v1/chat/completions";
+  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
   
   async function query(data) {
     const response = await fetch(
       API_URL,
       {
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json'
         },
         method: "POST",
         body: JSON.stringify({
-          messages: [
-            {
-              role: "user",
-              content: data.inputs
-            }
-          ],
-          max_tokens: 500,
-          model: "accounts/fireworks/models/deepseek-v3-0324"
+          contents: [{
+            parts: [{ text: data.inputs }]
+          }]
         })
       }
     );
@@ -43,6 +37,10 @@ const callAPI = () => {
   query({
     inputs: text,
   }).then((response) => {
-    output.innerHTML = response.choices[0].message.content;
+    if (response.candidates && response.candidates[0]) {
+      output.innerHTML = response.candidates[0].content.parts[0].text;
+    } else {
+      output.innerHTML = `Error: ${response.error?.message || 'Error desconocido'}`;
+    }
   });
 };
