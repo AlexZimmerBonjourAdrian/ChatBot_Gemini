@@ -1,3 +1,6 @@
+// Variable global para almacenar el historial de la conversación
+let conversationHistory = [];
+
 const callAPI = () => {
   const paragraph = document.getElementById("text-input");
   const output = document.getElementById("text-output");
@@ -26,6 +29,12 @@ const callAPI = () => {
   
   async function query(data) {
     try {
+      // Agregar el mensaje del usuario al historial
+      conversationHistory.push({
+        role: "user",
+        parts: [{ text: data.inputs }]
+      });
+
       const response = await fetch(
         API_URL,
         {
@@ -34,9 +43,7 @@ const callAPI = () => {
           },
           method: "POST",
           body: JSON.stringify({
-            contents: [{
-              parts: [{ text: data.inputs }]
-            }]
+            contents: conversationHistory
           })
         }
       );
@@ -94,6 +101,12 @@ const callAPI = () => {
     if (response.candidates && response.candidates[0]) {
       const formattedText = formatResponse(response.candidates[0].content.parts[0].text);
       output.innerHTML = formattedText;
+      
+      // Agregar la respuesta del modelo al historial
+      conversationHistory.push({
+        role: "model",
+        parts: [{ text: response.candidates[0].content.parts[0].text }]
+      });
     } else {
       output.innerHTML = `<div class="error">Error: ${response.error?.message || 'Error desconocido'}</div>`;
     }
@@ -101,4 +114,10 @@ const callAPI = () => {
     loading.style.display = 'none';
     output.innerHTML = `<div class="error">Error: ${error.message}</div>`;
   });
+};
+
+// Función para limpiar el historial de la conversación
+const clearHistory = () => {
+  conversationHistory = [];
+  document.getElementById("text-output").innerHTML = "La conversación ha sido reiniciada.";
 };

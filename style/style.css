@@ -66,10 +66,30 @@ h1 {
     font-weight: 500;
     transition: all 0.3s;
     width: 100%;
+    margin-bottom: 10px;
 }
 
 #call-api:hover {
     background-color: #1557b0;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.secondary-button {
+    background-color: #f8f9fa;
+    color: #1a73e8;
+    border: 2px solid #1a73e8;
+    padding: 14px 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s;
+    width: 100%;
+}
+
+.secondary-button:hover {
+    background-color: #e8f0fe;
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
