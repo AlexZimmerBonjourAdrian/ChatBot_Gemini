@@ -7,28 +7,27 @@
     <link rel="stylesheet" href="style/style.css">
   </head>
   <body>
-    <h1>ChatBot con Google Gemini</h1>
-    
-    <div class="input-container">
-      <input 
-        type="password" 
-        id="api-key-input" 
-        placeholder="Ingresa tu API key de Google"
-      >
-      <textarea 
-        id="text-input" 
-        placeholder="Escribe tu pregunta aquí..."
-      ></textarea>
-      <button id="call-api" onclick="callAPI()">Enviar</button>
-      <button id="clear-history" onclick="clearHistory()" class="secondary-button">Limpiar Conversación</button>
+    <div class="chat-container">
+      <div class="chat-header">
+        <h1>ChatBot con Google Gemini</h1>
+        <button id="clear-history" onclick="clearHistory()" class="secondary-button">Limpiar Conversación</button>
+      </div>
+      
+      <div class="chat-messages" id="chat-messages">
+        <!-- Los mensajes se agregarán aquí dinámicamente -->
+      </div>
+
+      <div class="chat-input-container">
+        <input type="password" id="api-key-input" placeholder="Ingresa tu API key de Google">
+        <div class="input-wrapper">
+          <textarea id="text-input" placeholder="Escribe tu mensaje aquí..." rows="1"></textarea>
+          <button id="call-api" onclick="callAPI()">Enviar</button>
+        </div>
+      </div>
+
+      <div id="loading" class="loading">Generando respuesta...</div>
     </div>
 
-    <div class="loading" id="loading">Generando respuesta...</div>
-
-    <div class="output-container">
-      <p id="text-output">La respuesta aparecerá aquí...</p>
-    </div>
-
-    <script type="text/javascript" src="scripts/main.js"></script>
+    <script src="scripts/main.js"></script>
   </body>
 </html>
