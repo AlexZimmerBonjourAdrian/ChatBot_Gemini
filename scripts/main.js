@@ -1,9 +1,6 @@
 // Variable global para almacenar el historial de la conversación
 let conversationHistory = [];
 
-// Crear un archivo .env en la raíz del proyecto (¡NO subir a GitHub!)
-const API_KEY = process.env.GEMINI_API_KEY;
-
 // Función para formatear el texto de respuesta
 function formatResponse(text) {
     // Dividir el texto en párrafos
@@ -62,7 +59,8 @@ function addMessageToChat(text, isUser = false) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-const callAPI = () => {
+// Definir las funciones globales
+function callAPI() {
     const paragraph = document.getElementById("text-input");
     const loading = document.getElementById("loading");
     const text = paragraph.value;
@@ -86,15 +84,14 @@ const callAPI = () => {
         parts: [{ text: text }]
     });
 
-    // Llamar a nuestro servidor
-    fetch('/.netlify/functions/generate', {
+    // Llamar directamente a la API de Gemini
+    fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${config.API_KEY}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            text: text,
-            history: conversationHistory
+            contents: conversationHistory
         })
     })
     .then(response => response.json())
@@ -117,19 +114,25 @@ const callAPI = () => {
         loading.style.display = 'none';
         addMessageToChat(`Error: ${error.message}`);
     });
-};
+}
 
-// Función para limpiar el historial de la conversación
-const clearHistory = () => {
+function clearHistory() {
     conversationHistory = [];
     document.getElementById("chat-messages").innerHTML = '';
     addMessageToChat("La conversación ha sido reiniciada.");
-};
+}
 
-// Evento para enviar mensaje con Enter (Shift+Enter para nueva línea)
-document.getElementById("text-input").addEventListener("keydown", function(e) {
-    if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        callAPI();
-    }
+// Inicializar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar el evento de Enter al input
+    document.getElementById("text-input").addEventListener("keydown", function(e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            callAPI();
+        }
+    });
+
+    // Hacer las funciones disponibles globalmente
+    window.callAPI = callAPI;
+    window.clearHistory = clearHistory;
 });
