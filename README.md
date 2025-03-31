@@ -10,6 +10,9 @@ Este proyecto implementa un chatbot usando el modelo Gemini 2.0 Flash de Google 
 
 1. Clona este repositorio
 2. Obtén tu API key de Google desde la página de configuración de tu cuenta
+3. Copia `config.example.js` a `config.js`
+4. Agrega tu API key en `config.js`
+5. El archivo `config.js` está en .gitignore y no se subirá a GitHub
 
 ## Uso
 

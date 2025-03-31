@@ -1,6 +1,9 @@
 // Variable global para almacenar el historial de la conversación
 let conversationHistory = [];
 
+// Crear un archivo .env en la raíz del proyecto (¡NO subir a GitHub!)
+const API_KEY = process.env.GEMINI_API_KEY;
+
 // Función para formatear el texto de respuesta
 function formatResponse(text) {
     // Dividir el texto en párrafos
@@ -61,16 +64,8 @@ function addMessageToChat(text, isUser = false) {
 
 const callAPI = () => {
     const paragraph = document.getElementById("text-input");
-    const apiKeyInput = document.getElementById("api-key-input");
     const loading = document.getElementById("loading");
     const text = paragraph.value;
-    const apiKey = apiKeyInput.value;
-
-    // Validar que la API key no esté vacía
-    if (!apiKey) {
-        addMessageToChat('Por favor, ingresa tu API key de Google', true);
-        return;
-    }
 
     // Validar que haya texto para enviar
     if (!text.trim()) {
@@ -85,38 +80,25 @@ const callAPI = () => {
     // Mostrar estado de carga
     loading.style.display = 'block';
 
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-    
-    async function query(data) {
-        try {
-            // Agregar el mensaje del usuario al historial
-            conversationHistory.push({
-                role: "user",
-                parts: [{ text: data.inputs }]
-            });
+    // Agregar el mensaje del usuario al historial
+    conversationHistory.push({
+        role: "user",
+        parts: [{ text: text }]
+    });
 
-            const response = await fetch(
-                API_URL,
-                {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    method: "POST",
-                    body: JSON.stringify({
-                        contents: conversationHistory
-                    })
-                }
-            );
-            const result = await response.json();
-            return result;
-        } catch (error) {
-            throw new Error('Error al conectar con la API: ' + error.message);
-        }
-    }
-
-    query({
-        inputs: text,
-    }).then((response) => {
+    // Llamar a nuestro servidor
+    fetch('/.netlify/functions/generate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            text: text,
+            history: conversationHistory
+        })
+    })
+    .then(response => response.json())
+    .then(response => {
         loading.style.display = 'none';
         if (response.candidates && response.candidates[0]) {
             const responseText = response.candidates[0].content.parts[0].text;
@@ -130,7 +112,8 @@ const callAPI = () => {
         } else {
             addMessageToChat(`Error: ${response.error?.message || 'Error desconocido'}`);
         }
-    }).catch((error) => {
+    })
+    .catch((error) => {
         loading.style.display = 'none';
         addMessageToChat(`Error: ${error.message}`);
     });
