@@ -85,7 +85,8 @@ function callAPI() {
     });
 
     // Llamar directamente a la API de Gemini
-    fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${config.API_KEY}`, {
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.API_KEY}`;
+    fetch(API_URL, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
