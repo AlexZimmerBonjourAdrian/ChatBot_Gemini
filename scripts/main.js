@@ -84,15 +84,15 @@ function callAPI() {
         parts: [{ text: text }]
     });
 
-    // Llamar directamente a la API de Gemini
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.API_KEY}`;
-    fetch(API_URL, {
+    // Llamar a la función serverless de Netlify
+    fetch('/.netlify/functions/generate', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            contents: conversationHistory
+            text: text,
+            history: conversationHistory
         })
     })
     .then(response => response.json())

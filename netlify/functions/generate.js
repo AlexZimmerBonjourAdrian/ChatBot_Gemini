@@ -16,6 +16,15 @@ exports.handler = async function(event, context) {
         });
 
         const result = await response.json();
+        
+        // Verificar si hay error en la respuesta
+        if (result.error) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: result.error.message })
+            };
+        }
+
         return {
             statusCode: 200,
             body: JSON.stringify(result)
