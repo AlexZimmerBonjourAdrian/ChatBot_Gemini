@@ -29,9 +29,20 @@ exports.handler = async function(event, context) {
         
         // Verificar si hay error en la respuesta
         if (result.error) {
+            console.error('Gemini API Error Details:', {
+                status: result.error.status || 'Unknown',
+                code: result.error.code || 'Unknown',
+                message: result.error.message || 'Unknown error',
+                details: result.error.details || 'No additional details'
+            });
             return {
                 statusCode: 400,
-                body: JSON.stringify({ error: result.error.message })
+                body: JSON.stringify({ 
+                    error: result.error.message,
+                    status: result.error.status,
+                    code: result.error.code,
+                    details: result.error.details
+                })
             };
         }
 
