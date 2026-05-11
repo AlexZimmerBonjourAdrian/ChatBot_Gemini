@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 exports.handler = async function(event, context) {
     try {
         const { text, history } = JSON.parse(event.body);
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.API_KEY}`;
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.API_KEY}`;
 
         const API_KEY = process.env.API_KEY;
         console.log('API_KEY configured:', API_KEY ? 'YES' : 'NO');
