@@ -3,43 +3,65 @@ let conversationHistory = [];
 
 // Función para formatear el texto de respuesta
 function formatResponse(text) {
-    // Dividir el texto en párrafos
-    let paragraphs = text.split('\n\n').filter(p => p.trim());
-    
-    // Formatear cada párrafo
-    paragraphs = paragraphs.map(paragraph => {
-        // Detectar listas
-        if (paragraph.trim().startsWith('-') || paragraph.trim().startsWith('*')) {
-            const items = paragraph.split('\n')
-                .filter(item => item.trim().startsWith('-') || item.trim().startsWith('*'))
-                .map(item => `<li>${item.replace(/^[-*]\s*/, '')}</li>`);
-            return `<ul>${items.join('')}</ul>`;
-        }
-        
-        // Detectar código
-        if (paragraph.includes('```')) {
-            const codeBlocks = paragraph.split('```');
-            return codeBlocks.map((block, index) => {
-                if (index % 2 === 1) {
-                    return `<pre><code>${block.trim()}</code></pre>`;
-                }
-                return block.trim() ? `<p>${block.trim()}</p>` : '';
-            }).join('');
-        }
-        
-        // Detectar texto en negrita
-        paragraph = paragraph.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        
-        // Detectar texto en cursiva
-        paragraph = paragraph.replace(/\*(.*?)\*/g, '<em>$1</em>');
-        
-        // Detectar código en línea
-        paragraph = paragraph.replace(/`(.*?)`/g, '<code>$1</code>');
-        
-        return paragraph.trim() ? `<p>${paragraph.trim()}</p>` : '';
+    // 1. Detectar bloques de código primero para protegerlos
+    const codeBlocks = [];
+    text = text.replace(/```([\s\S]*?)```/g, (match, code) => {
+        const id = `__CODE_BLOCK_${codeBlocks.length}__`;
+        codeBlocks.push(`<pre><code>${code.trim()}</code></pre>`);
+        return id;
     });
-    
-    return paragraphs.join('\n');
+
+    // 2. Formatear negritas, cursivas y código en línea
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    text = text.replace(/`(.*?)`/g, '<code>$1</code>');
+
+    // 3. Dividir por líneas para procesar listas y párrafos
+    const lines = text.split('\n');
+    let htmlResult = '';
+    let inList = false;
+    let listType = ''; // 'ul' o 'ol'
+
+    lines.forEach(line => {
+        const trimmedLine = line.trim();
+        
+        // Detectar elementos de lista desordenada (- o *)
+        const isUnordered = /^[-*]\s+/.test(trimmedLine);
+        // Detectar elementos de lista ordenada (1. 2. etc)
+        const isOrdered = /^\d+\.\s+/.test(trimmedLine);
+
+        if (isUnordered || isOrdered) {
+            const currentType = isUnordered ? 'ul' : 'ol';
+            const content = trimmedLine.replace(/^([-*]|\d+\.)\s+/, '');
+
+            if (!inList) {
+                htmlResult += `<${currentType}>`;
+                inList = true;
+                listType = currentType;
+            } else if (listType !== currentType) {
+                htmlResult += `</${listType}><${currentType}>`;
+                listType = currentType;
+            }
+            htmlResult += `<li>${content}</li>`;
+        } else {
+            if (inList) {
+                htmlResult += `</${listType}>`;
+                inList = false;
+            }
+            if (trimmedLine) {
+                htmlResult += `<p>${trimmedLine}</p>`;
+            }
+        }
+    });
+
+    if (inList) htmlResult += `</${listType}>`;
+
+    // 4. Reinsertar los bloques de código
+    codeBlocks.forEach((block, index) => {
+        htmlResult = htmlResult.replace(`__CODE_BLOCK_${index}__`, block);
+    });
+
+    return htmlResult;
 }
 
 // Función para agregar un mensaje al chat
